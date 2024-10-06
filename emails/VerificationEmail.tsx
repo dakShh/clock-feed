@@ -4,11 +4,11 @@ import {
     Head,
     Heading,
     Html,
-    Link,
-    Preview,
+    // Link,
+    // Preview,
     Section,
     Text,
-    Button,
+    // Button,
 } from '@react-email/components';
 
 interface verificationEmailProps {
