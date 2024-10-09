@@ -3,13 +3,21 @@ import UserModel from '@/models/User';
 import bcrypt from 'bcryptjs';
 
 import { sendVerificationEmail } from '@/helpers/sendVerificationEmail';
+import { signupSchema } from '@/schemas/signUpSchema';
+import { z } from 'zod';
 
 export async function POST(request: Request) {
     await dbConnect();
     try {
-        const { username, email, password } = await request.json();
+        const body = await request.json();
+
+        const validationResult = signupSchema.safeParse(body);
+        console.log('validationResult: ', validationResult.error?.message);
+
+        const { username, email, password } = body;
 
         const existingUserVerifiedByUsername = await UserModel.findOne({ username, isVerified: true });
+
         if (existingUserVerifiedByUsername) {
             return Response.json(
                 {
@@ -54,7 +62,7 @@ export async function POST(request: Request) {
             await newUser.save();
         }
 
-        const emailResponse = await sendVerificationEmail(email, username, password);
+        const emailResponse = await sendVerificationEmail(email, username, verifyCode);
         if (!emailResponse.success) {
             return Response.json(
                 {
@@ -73,11 +81,19 @@ export async function POST(request: Request) {
             { status: 201 }
         );
     } catch (error) {
-        console.error('Error registering user', error);
+        // if (error instanceof z.ZodError) {
+        //     const errors = error.errors.map((err) => ({
+        //         field: err.path[0],
+        //         message: err.message,
+        //     }));
+        //     return new Response(JSON.stringify({ errors }), { status: 400 });
+        // }
+
         return Response.json(
             {
                 success: false,
                 message: 'Error registering user',
+                error: error,
             },
             { status: 500 }
         );
