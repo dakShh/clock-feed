@@ -53,5 +53,12 @@ export async function GET(request: Request) {
         });
     } catch (error) {
         console.error('error: ', error);
+        return Response.json(
+            {
+                status: false,
+                message: 'Unexpected error occured',
+            },
+            { status: 401 }
+        );
     }
 }

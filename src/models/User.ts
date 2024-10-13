@@ -3,17 +3,23 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 export interface Message extends Document {
     content: string;
     createAt: Date;
+    senderId: string;
 }
 
-const MessageSchema: Schema<Message> = new Schema(
-    {
-        content: {
-            type: String,
-            required: true,
-        },
+const MessageSchema: Schema<Message> = new Schema({
+    content: {
+        type: String,
+        required: true,
     },
-    { timestamps: true }
-);
+    senderId: {
+        type: String,
+        required: true,
+    },
+    createAt: {
+        type: Date,
+        default: Date.now,
+    },
+});
 
 export interface User extends Document {
     username: string;
