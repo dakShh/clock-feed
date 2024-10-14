@@ -12,6 +12,8 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Button, buttonVariants } from '@/components/ui/button';
 
+import { useToast } from '@/hooks/use-toast';
+
 import {
   Form,
   FormControl,
@@ -27,6 +29,7 @@ import { Input } from '@/components/ui/input';
 import { signupSchema } from '@/schemas/signUpSchema';
 
 export default function ProfileForm() {
+  const { toast } = useToast();
   const [username, setUsername] = useState('');
   const [usernameMessage, setUsernameMessage] = useState('');
   const [isCheckingUsername, setIsCheckingUsername] = useState(false);
@@ -42,11 +45,15 @@ export default function ProfileForm() {
       password: ''
     }
   });
-  console.log(form.formState.errors);
 
   // 2. Define a submit handler.
   function onSubmit(values: z.infer<typeof signupSchema>) {
     console.log('values: ', values);
+
+    toast({
+      title: 'Scheduled: Catch up',
+      description: 'Friday, February 10, 2023 at 5:57 PM'
+    });
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
   }
@@ -66,22 +73,14 @@ export default function ProfileForm() {
 
         {/* 1st grid */}
         <div className="relative hidden h-full flex-col bg-muted p-10 text-white dark:border-r lg:flex">
-          <div className="absolute inset-0 bg-zinc-900" />
-          <div className="relative z-20 flex items-center text-lg font-medium">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="mr-2 h-6 w-6"
-            >
-              <path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3" />
-            </svg>
-            Acme Inc
-          </div>
+          <div
+            className={cn(
+              'absolute inset-0 ',
+              'bg-primary'
+              // 'bg-zinc-700'
+            )}
+          />
+          <div className="relative z-20 flex items-center text-lg font-medium">readme.ca</div>
           <div className="relative z-20 mt-auto">
             <blockquote className="space-y-2">
               <p className="text-lg">
@@ -102,34 +101,75 @@ export default function ProfileForm() {
             </p>
           </div>
           <Form {...form}>
-            {/* <p>Debounced value: {username}</p> */}
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 px-8 sm:px-0">
-              {/* <input
-                defaultValue={''}
-                placeholder="Lets try placeholder"
-                onChange={(e) => debouncedUsername(e.target.value)}
-              /> */}
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2 px-8 sm:px-0">
               <FormField
                 control={form.control}
                 name="username"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Username</FormLabel>
+                    {/* <FormLabel>Username</FormLabel> */}
                     <FormControl>
                       <Input
-                        placeholder="shadcn"
-                        {...field}
-                        // value={username}
-                        // onChange={field.onChange}
+                        // {...field}
+                        placeholder="Eg: daksh"
+                        {...form.register('username')}
+                        name="username"
+                        className={cn(form?.formState?.errors?.username && 'border-destructive')}
+                        onChange={(e) => {
+                          debouncedUsername(e.target.value);
+                          field.onChange(e);
+                        }}
                       />
                     </FormControl>
-                    <FormDescription>This is your public display name.</FormDescription>
+                    {/* <FormDescription>This is your public display name.</FormDescription> */}
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <button type="submit">submit</button>
-              {/* <Button type="submit">Submit</Button> */}
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    {/* <FormLabel>Username</FormLabel> */}
+                    <FormControl>
+                      <Input
+                        placeholder="input@example.com"
+                        {...field}
+                        className={cn(form?.formState?.errors?.username && 'border-destructive')}
+                        // value={username}
+                        // onChange={field.onChange}
+                      />
+                    </FormControl>
+                    {/* <FormDescription>This is your public display name.</FormDescription> */}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    {/* <FormLabel>Username</FormLabel> */}
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder="password"
+                        className={cn(form?.formState?.errors?.username && 'border-destructive', '')}
+                        type="password"
+                        // value={username}
+                        // onChange={field.onChange}
+                      />
+                    </FormControl>
+                    {/* <FormDescription>This is your public display name.</FormDescription> */}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" className="w-full">
+                Submit
+              </Button>
             </form>
           </Form>
           <p className="px-8 text-center text-sm text-muted-foreground">
