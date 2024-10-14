@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useDebounceCallback } from 'usehooks-ts';
+import axios, { AxiosError } from 'axios';
 
 import Image from 'next/image';
 import Link from 'next/link';
@@ -27,15 +28,20 @@ import { Input } from '@/components/ui/input';
 
 // Schema imports
 import { signupSchema } from '@/schemas/signUpSchema';
+import { ApiResponse } from '@/types/ApiResponse';
+import { useRouter } from 'next/navigation';
+import { Loader } from '@/components/ui/loader';
 
 export default function ProfileForm() {
   const { toast } = useToast();
   const [username, setUsername] = useState('');
   const [usernameMessage, setUsernameMessage] = useState('');
   const [isCheckingUsername, setIsCheckingUsername] = useState(false);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const debouncedUsername = useDebounceCallback(setUsername, 500);
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof signupSchema>>({
     resolver: zodResolver(signupSchema),
@@ -46,23 +52,62 @@ export default function ProfileForm() {
     }
   });
 
-  // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof signupSchema>) {
+  async function onSubmit(values: z.infer<typeof signupSchema>) {
     console.log('values: ', values);
+    setIsSubmitting(true);
 
-    toast({
-      title: 'Scheduled: Catch up',
-      description: 'Friday, February 10, 2023 at 5:57 PM'
-    });
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
+    try {
+      const response = await axios.post<ApiResponse>('/api/sign-up', values);
+      toast({
+        title: 'Success',
+        description: response.data.message
+      });
+      // router.replace(`/verify/${values.username}`);
+    } catch (error) {
+      const axiosError = error as AxiosError<ApiResponse>;
+      const errorMessage = axiosError?.response?.data.message;
+      toast({
+        title: 'Signup failed',
+        description: errorMessage,
+        variant: 'destructive'
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
+  useEffect(() => {
+    const checkUsernameUnique = async () => {
+      if (username) {
+        setIsCheckingUsername(true);
+        setUsernameMessage('');
+        try {
+          const response = await axios.get<ApiResponse>(
+            `/api/check-username-unique?username=${username}`
+          );
+          setUsernameMessage(response.data.message);
+        } catch (error) {
+          console.log('err: ', error);
+          const axiosError = error as AxiosError<ApiResponse>;
+          setUsernameMessage(axiosError.response?.data.message ?? 'Error checking username');
+        } finally {
+          setIsCheckingUsername(false);
+        }
+      }
+    };
+
+    checkUsernameUnique();
+
+    if (!username) setUsernameMessage('');
+    return () => {
+      setIsCheckingUsername(false);
+    };
+  }, [username]);
   return (
     <div>
       <div className="lg:container relative h-screen flex-col items-center justify-center grid lg:max-w-none lg:grid-cols-2 lg:px-0">
         <Link
-          href="/examples/authentication"
+          href="/sign-in"
           className={cn(
             buttonVariants({ variant: 'ghost' }),
             'absolute right-4 top-4 md:right-8 md:top-8'
@@ -93,15 +138,15 @@ export default function ProfileForm() {
         </div>
 
         {/* 2nd grid */}
-        <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
+        <div className="mx-auto flex w-full flex-col space-y-6 justify-center sm:w-[350px]">
           <div className="flex flex-col space-y-2 text-center">
             <h1 className="text-2xl font-semibold tracking-tight">Create an account</h1>
-            <p className="text-sm text-muted-foreground">
+            <div className="text-sm text-muted-foreground">
               Enter your email below to create your account
-            </p>
+            </div>
           </div>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2 px-8 sm:px-0">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 px-8 sm:px-0">
               <FormField
                 control={form.control}
                 name="username"
@@ -114,15 +159,31 @@ export default function ProfileForm() {
                         placeholder="Eg: daksh"
                         {...form.register('username')}
                         name="username"
-                        className={cn(form?.formState?.errors?.username && 'border-destructive')}
+                        className={cn(
+                          form?.formState?.errors?.username ||
+                            (usernameMessage &&
+                              'Username is available. :)' !== usernameMessage &&
+                              'border-destructive')
+                        )}
                         onChange={(e) => {
+                          setIsCheckingUsername(true);
                           debouncedUsername(e.target.value);
                           field.onChange(e);
                         }}
+                        autoComplete="off"
                       />
                     </FormControl>
-                    {/* <FormDescription>This is your public display name.</FormDescription> */}
-                    <FormMessage />
+                    {isCheckingUsername && <Loader />}
+                    {(username && usernameMessage && !isCheckingUsername && (
+                      <p
+                        className={cn(
+                          `text-[0.8rem]`,
+                          `${'Username is available. :)' === usernameMessage ? 'text-green-400' : 'text-destructive'}`
+                        )}
+                      >
+                        {usernameMessage}
+                      </p>
+                    )) || <FormMessage />}
                   </FormItem>
                 )}
               />
@@ -136,7 +197,7 @@ export default function ProfileForm() {
                       <Input
                         placeholder="input@example.com"
                         {...field}
-                        className={cn(form?.formState?.errors?.username && 'border-destructive')}
+                        className={cn(form?.formState?.errors?.email && 'border-destructive')}
                         // value={username}
                         // onChange={field.onChange}
                       />
@@ -156,7 +217,7 @@ export default function ProfileForm() {
                       <Input
                         {...field}
                         placeholder="password"
-                        className={cn(form?.formState?.errors?.username && 'border-destructive', '')}
+                        className={cn(form?.formState?.errors?.password && 'border-destructive', '')}
                         type="password"
                         // value={username}
                         // onChange={field.onChange}
@@ -167,8 +228,9 @@ export default function ProfileForm() {
                   </FormItem>
                 )}
               />
+
               <Button type="submit" className="w-full">
-                Submit
+                {isSubmitting ? <Loader /> : 'Submit'}
               </Button>
             </form>
           </Form>
