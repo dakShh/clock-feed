@@ -8,22 +8,13 @@ import { z } from 'zod';
 import { useDebounceCallback } from 'usehooks-ts';
 import axios, { AxiosError } from 'axios';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Button, buttonVariants } from '@/components/ui/button';
 
 import { useToast } from '@/hooks/use-toast';
 
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage
-} from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 
 // Schema imports
@@ -53,7 +44,6 @@ export default function ProfileForm() {
   });
 
   async function onSubmit(values: z.infer<typeof signupSchema>) {
-    console.log('values: ', values);
     setIsSubmitting(true);
 
     try {
@@ -62,7 +52,7 @@ export default function ProfileForm() {
         title: 'Success',
         description: response.data.message
       });
-      // router.replace(`/verify/${values.username}`);
+      router.replace(`/verify/${values.username}`);
     } catch (error) {
       const axiosError = error as AxiosError<ApiResponse>;
       const errorMessage = axiosError?.response?.data.message;

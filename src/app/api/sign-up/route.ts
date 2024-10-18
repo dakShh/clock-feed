@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 
 import { sendVerificationEmail } from '@/helpers/sendVerificationEmail';
 import { signupSchema } from '@/schemas/signUpSchema';
-import { z } from 'zod';
+// import { z } from 'zod';
 
 export async function POST(request: Request) {
   await dbConnect();
@@ -61,16 +61,16 @@ export async function POST(request: Request) {
       await newUser.save();
     }
 
-    // const emailResponse = await sendVerificationEmail(email, username, verifyCode);
-    // if (!emailResponse.success) {
-    //   return Response.json(
-    //     {
-    //       success: false,
-    //       message: emailResponse.message
-    //     },
-    //     { status: 500 }
-    //   );
-    // }
+    const emailResponse = await sendVerificationEmail(email, username, verifyCode);
+    if (!emailResponse.success) {
+      return Response.json(
+        {
+          success: false,
+          message: emailResponse.message
+        },
+        { status: 500 }
+      );
+    }
 
     return Response.json(
       {
