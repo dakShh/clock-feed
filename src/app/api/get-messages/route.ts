@@ -22,7 +22,7 @@ export async function GET(request: Request) {
   }
 
   const userId = new mongoose.Types.ObjectId(user?._id);
-  console.log('userId:::::::::', userId);
+
   try {
     const user = await UserModel.aggregate([
       { $match: { _id: userId } },
