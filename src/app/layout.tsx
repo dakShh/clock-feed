@@ -3,6 +3,7 @@ import localFont from 'next/font/local';
 import './globals.css';
 import AuthProvider from '@/context/AuthProvider';
 import { Toaster } from '@/components/ui/toaster';
+import { cn } from '@/lib/utils';
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
   variable: '--font-geist-sans',
@@ -23,7 +24,12 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <AuthProvider>
-        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <body
+          className={cn(
+            `${geistSans.variable} ${geistMono.variable} antialiased`,
+            'font-[family-name:var(--font-geist-sans)]'
+          )}
+        >
           {children}
           <Toaster />
         </body>
