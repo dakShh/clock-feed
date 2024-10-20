@@ -14,6 +14,11 @@ import { User } from 'next-auth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { messageSchema } from '@/schemas/messageSchema';
 
 export default function HonestHubBoard({ params }: { params: { username: string } }) {
   const router = useRouter();
@@ -21,13 +26,21 @@ export default function HonestHubBoard({ params }: { params: { username: string 
   const [userDetails, setUserDetails] = useState<User>();
   const [isAcceptingMessages, setIsAcceptingMessages] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSendMessageLoading, setIsSendMessageLoading] = useState<boolean>(false);
   const [messages, setMessages] = useState<Message[]>([]);
+
+  const form = useForm<z.infer<typeof messageSchema>>({
+    resolver: zodResolver(messageSchema),
+    defaultValues: {
+      content: ''
+    }
+  });
 
   const fetchMessages = async (userId: string) => {
     // setIsLoading(true);
-    console.log('fetch messages: ', userId);
     try {
       const response = await axios.get<ApiResponse>(`/api/get-user-messages?userId=${userId}`);
+      console.log('response: ', response);
       setMessages(response.data.messages || []);
     } catch (error) {
       const axiosError = error as AxiosError<ApiResponse>;
@@ -62,6 +75,35 @@ export default function HonestHubBoard({ params }: { params: { username: string 
       });
     }
   };
+
+  const onSubmit = async (data: z.infer<typeof messageSchema>) => {
+    setIsSendMessageLoading(true);
+    try {
+      const response = await axios.post('/api/send-message', {
+        ...data,
+        username: params.username
+      });
+
+      if (response.status) {
+        toast({
+          title: `Thank you for reviewing ${params.username} !`
+        });
+      }
+      form.reset();
+      fetchMessages(userDetails?._id || '');
+    } catch (error) {
+      const axiosError = error as AxiosError<ApiResponse>;
+      const errorMessage = axiosError?.response?.data.message;
+      toast({
+        title: 'Error sending review! ":(',
+        description: errorMessage,
+        variant: 'destructive'
+      });
+    } finally {
+      setIsSendMessageLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchUserDetails().then((x) => {
       fetchMessages(x?._id || '');
@@ -78,9 +120,9 @@ export default function HonestHubBoard({ params }: { params: { username: string 
   }
 
   return (
-    <div className="bg-secondary-foreground/10 min-h-screen">
+    <div className="bg-secondary-foreground/10 min-h-screen pb-16">
       <NavBar />
-      <div className="container mx-auto grid text-background ">
+      <div className="container mx-auto grid text-background">
         <div className="mx-auto max-w-4xl pt-24 pb-8">
           <div className="hidden sm:mb-8 sm:flex sm:justify-center">
             {/* <div className="relative rounded-full px-3 py-1 text-sm leading-6  ring-1 ring-gray-900/10 hover:ring-gray-900/20">
@@ -105,20 +147,44 @@ export default function HonestHubBoard({ params }: { params: { username: string 
                   'relative'
                 )}
               >
-                <div className="w-full flex items-center">
-                  <Input
-                    disabled={!isAcceptingMessages}
-                    placeholder={`"Eg: ${params.username} is awesome! :)"`}
-                    className="w-full max-w-7xl ring-0 rounded-s-xl rounded-e-none focus-visible:ring-0 border border-background/40  focus:border-primary/50 shadow-md text-secondary-foreground/55 placeholder:text-secondary-foreground/30"
-                    maxLength={150}
-                  />
-                  <Button
-                    disabled={!isAcceptingMessages}
-                    className="rounded-e-xl rounded-s-none border-primary shadow-md"
-                  >
-                    {`Review ${params?.username || ''}`}
-                  </Button>
-                </div>
+                <Form {...form}>
+                  <form className="w-full flex items-center" onSubmit={form.handleSubmit(onSubmit)}>
+                    <Input
+                      disabled={!isAcceptingMessages}
+                      placeholder={`"Eg: ${params.username} is awesome! :)"`}
+                      className={cn(
+                        `w-full max-w-7xl ring-0 rounded-s-xl rounded-e-none focus-visible:ring-0 border border-background/40  focus:border-primary/50 shadow-md text-secondary-foreground/55 placeholder:text-secondary-foreground/30`,
+                        `${form.formState.errors.content?.message ? 'border-red-500 focus:border-red-500' : ''}`
+                      )}
+                      maxLength={150}
+                      autoComplete="off"
+                      {...form.register('content')}
+                      onChange={(e) => form.setValue('content', e.target.value)}
+                    />
+                    <p
+                      className={cn(
+                        'text-[0.8rem] font-medium text-destructive',
+                        'absolute left-3 bottom-[-22px]'
+                      )}
+                    >
+                      {form.formState.errors.content?.message || ''}
+                    </p>
+                    {isSendMessageLoading && (
+                      <p className="text-[0.8rem] font-medium text-primary absolute left-3 bottom-[-22px] flex items-center gap-x-1">
+                        <Loader size={15} className="animate-spin text-primary" /> Sending..
+                      </p>
+                    )}
+
+                    <FormMessage />
+                    <Button
+                      type="submit"
+                      // disabled={!isAcceptingMessages}
+                      className="rounded-e-xl rounded-s-none border-primary shadow-md"
+                    >
+                      {`Review ${params?.username || ''}`}
+                    </Button>
+                  </form>
+                </Form>
                 {isAcceptingMessages ? (
                   <p className="text-teal-600 text-sm italic font-light absolute right-3 top-[-16px] ">
                     {`${params.username} is accepting messages.`}
@@ -136,11 +202,10 @@ export default function HonestHubBoard({ params }: { params: { username: string 
 
       <div>
         <div className="container mx-auto pt-8 px-6">
+          <Separator decorative className="mt-2 mb-4 bg-secondary-foreground/10 mx-auto " />
           <div className="">
-            <h2 className="text-primary/80 font-bold text-4xl ">HonestHUB Wall</h2>
-            <Separator decorative className="mt-2 mb-4 font-thin" />
+            <h2 className="text-primary/80 font-bold text-4xl mb-8">HonestHUB Wall</h2>
           </div>
-          <div></div>
           <div className="grid grid-cols-4 gap-4 ">
             {messages?.map(({ content, createAt }, index) => {
               const date = new Date(createAt);
