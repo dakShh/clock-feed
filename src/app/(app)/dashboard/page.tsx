@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import NavBar from '@/components/NavBar';
-import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { User } from 'next-auth';
 import { useSession } from 'next-auth/react';
@@ -125,7 +124,7 @@ export default function Dashboard() {
     );
   }
   return (
-    <div className="bg-secondary-foreground/85">
+    <div className="bg-secondary-foreground/90">
       <NavBar username={user.username || user.email || ''} />
       <div className="container mx-auto grid text-background ">
         <div className="">
@@ -141,47 +140,51 @@ export default function Dashboard() {
                 </div> */}
               </div>
               <div className="">
-                <h1 className="text-balance text-4xl font-bold tracking-tight sm:text-6xl">
-                  {` Hey, ${user?.username?.toUpperCase()}! Welcome back to your HonestHub space. 🚀`}
-                </h1>
-                <p className="text-lg leading-8 ">Let’s see what your community is saying today!</p>
-                <div className={cn(' font-bold pt-2', 'flex items-center gap-x-2')}>
-                  <div className="text-background font-semibold text-lg">Accepting messages: </div>
-                  {isSwitchLoading ? (
-                    <Loader size={20} className="animate-spin text-secondary-foreground p-x-2" />
-                  ) : (
-                    <Switch
-                      {...register('acceptMessage')}
-                      checked={acceptMessages}
-                      onCheckedChange={handleSwitchChange}
-                      disabled={isSwitchLoading}
-                    />
-                  )}
+                <h1 className="text-balance font-light tracking-tight sm:text-2xl">{` Hey ${user?.username}! `}</h1>
+                <div className="text-background tracking-tight">
+                  <p className="text-6xl font-bold ">Welcome back to your HonestHub space. 🚀</p>
+                  <p className="mt-3">Let’s see what your community is saying today!</p>
                 </div>
-                <div className="mt-16 flex items-center justify-center ">
-                  <div
-                    className={cn(
-                      'font-light rounded-s-xl',
-                      'px-4 py-2',
-                      'underline underline-offset-2',
-                      'bg-secondary-foreground/40',
-                      'cursor-pointer',
-                      'shadow-lg '
+
+                <div className="mt-20 flex flex-col items-center gap-y-2">
+                  <div className={cn('pt-2', 'flex items-center gap-x-2')}>
+                    <div className="text-background">Accepting messages: </div>
+                    {isSwitchLoading ? (
+                      <Loader size={20} className="animate-spin text-secondary-foreground p-x-2" />
+                    ) : (
+                      <Switch
+                        {...register('acceptMessage')}
+                        checked={acceptMessages}
+                        onCheckedChange={handleSwitchChange}
+                        disabled={isSwitchLoading}
+                      />
                     )}
-                  >
-                    {(data?.user && personalUrl) || 'NA'}
                   </div>
-                  <button
-                    className={cn(
-                      'rounded-e-xl',
-                      'grid place-content-center self-stretch px-5',
-                      'underline',
-                      'bg-primary',
-                      'shadow-lg'
-                    )}
-                  >
-                    <Copy size={20} />
-                  </button>
+                  <div className="flex items-center">
+                    <div
+                      className={cn(
+                        'font-light rounded-s-xl',
+                        'px-4 py-2',
+                        'underline underline-offset-2',
+                        'bg-secondary-foreground/40',
+                        'cursor-pointer',
+                        'shadow-lg '
+                      )}
+                    >
+                      {(data?.user && personalUrl) || 'NA'}
+                    </div>
+                    <button
+                      className={cn(
+                        'rounded-e-xl',
+                        'grid place-content-center self-stretch px-5',
+                        'underline',
+                        'bg-primary',
+                        'shadow-lg'
+                      )}
+                    >
+                      <Copy size={20} />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
