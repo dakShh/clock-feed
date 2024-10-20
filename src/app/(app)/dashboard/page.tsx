@@ -14,11 +14,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { acceptMessageSchema } from '@/schemas/acceptMessageSchemas';
 import { cn } from '@/lib/utils';
 import { Copy, Loader } from 'lucide-react';
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
 
 export default function Dashboard() {
   const { data } = useSession();
   const user: User = data?.user as User;
-  const personalUrl = `${process.env.NEXT_PUBLIC_APP_URL}/u/${user?.username}`;
+  const personalUrl = `${process.env.NEXT_PUBLIC_APP_URL}u/${user?.username}`;
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -125,10 +126,10 @@ export default function Dashboard() {
     );
   }
   return (
-    <div className="bg-secondary-foreground/90">
+    <div className="">
       <NavBar />
-      <div className="container mx-auto grid text-background ">
-        <div className="relative px-6 lg:px-8">
+      <div className="bg-secondary-foreground/90 container mx-auto grid text-background ">
+        <div className="relative px-6 lg:px-8  ">
           <div className="mx-auto max-w-3xl pt-24 pb-8">
             <div className="hidden sm:mb-8 sm:flex sm:justify-center">
               {/* <div className="relative rounded-full px-3 py-1 text-sm leading-6  ring-1 ring-gray-900/10 hover:ring-gray-900/20">
@@ -188,6 +189,28 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto py-5">
+        <div className="grid grid-cols-4 gap-4 px-6">
+          {messages?.map(({ content, createAt }, index) => {
+            const date = new Date(createAt);
+
+            return (
+              <Card
+                key={index}
+                className={cn('py-5', 'bg-primary/70 text-background', 'shadow border-none')}
+              >
+                <CardContent className="flex items-between w-full">
+                  <div className="font-bold w-full pr-3">{content}</div>
+                  <div className="text-xs font-thin">
+                    {date.toLocaleString('en-US').split(',')[0]}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </div>
 
