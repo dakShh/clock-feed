@@ -15,6 +15,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { acceptMessageSchema } from '@/schemas/acceptMessageSchemas';
 import { cn } from '@/lib/utils';
 import { Copy, Loader } from 'lucide-react';
+
 export default function Dashboard() {
   const { data } = useSession();
   const user: User = data?.user as User;
@@ -59,7 +60,6 @@ export default function Dashboard() {
       setIsSwitchLoading(false);
       try {
         const response = await axios.get<ApiResponse>('/api/get-messages');
-        console.log('response: ', response);
         setMessages(response.data.messages || []);
         if (refresh) {
           toast({
@@ -114,7 +114,7 @@ export default function Dashboard() {
     if (!data || !data?.user) return;
 
     fetchAcceptMessage();
-    // fetchMessages();
+    fetchMessages();
   }, [data, setValue, fetchAcceptMessage, fetchMessages]);
   if (!data || !data.user) {
     return (
@@ -125,7 +125,7 @@ export default function Dashboard() {
     );
   }
   return (
-    <div className="bg-primary/65">
+    <div className="bg-secondary-foreground/85">
       <NavBar username={user.username || user.email || ''} />
       <div className="container mx-auto grid text-background ">
         <div className="">
@@ -142,7 +142,7 @@ export default function Dashboard() {
               </div>
               <div className="">
                 <h1 className="text-balance text-4xl font-bold tracking-tight sm:text-6xl">
-                  {` Hey, ${user?.username ? user?.username.toUpperCase() : 'UNKNOWN'}! Welcome back to your HonestHub space. 🚀`}
+                  {` Hey, ${user?.username?.toUpperCase()}! Welcome back to your HonestHub space. 🚀`}
                 </h1>
                 <p className="text-lg leading-8 ">Let’s see what your community is saying today!</p>
                 <div className={cn(' font-bold pt-2', 'flex items-center gap-x-2')}>
