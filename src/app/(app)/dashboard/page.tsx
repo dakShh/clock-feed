@@ -125,66 +125,64 @@ export default function Dashboard() {
   }
   return (
     <div className="bg-secondary-foreground/90">
-      <NavBar username={user.username || user.email || ''} />
+      <NavBar />
       <div className="container mx-auto grid text-background ">
-        <div className="">
-          <div className="relative px-6 lg:px-8">
-            <div className="mx-auto max-w-3xl pt-24 pb-8">
-              <div className="hidden sm:mb-8 sm:flex sm:justify-center">
-                {/* <div className="relative rounded-full px-3 py-1 text-sm leading-6  ring-1 ring-gray-900/10 hover:ring-gray-900/20">
+        <div className="relative px-6 lg:px-8">
+          <div className="mx-auto max-w-3xl pt-24 pb-8">
+            <div className="hidden sm:mb-8 sm:flex sm:justify-center">
+              {/* <div className="relative rounded-full px-3 py-1 text-sm leading-6  ring-1 ring-gray-900/10 hover:ring-gray-900/20">
                   Announcing our next round of funding.{' '}
                   <a href="#" className="font-semibold text-indigo-600">
                     <span className="absolute inset-0" aria-hidden="true"></span>Read more{' '}
                     <span aria-hidden="true">&rarr;</span>
                   </a>
                 </div> */}
+            </div>
+            <div className="">
+              <h1 className="text-balance font-light tracking-tight sm:text-2xl">{` Hey ${user?.username}! `}</h1>
+              <div className="text-background tracking-tight">
+                <p className="text-6xl font-bold ">Welcome back to your HonestHub space. 🚀</p>
+                <p className="mt-3">Let’s see what your community is saying today!</p>
               </div>
-              <div className="">
-                <h1 className="text-balance font-light tracking-tight sm:text-2xl">{` Hey ${user?.username}! `}</h1>
-                <div className="text-background tracking-tight">
-                  <p className="text-6xl font-bold ">Welcome back to your HonestHub space. 🚀</p>
-                  <p className="mt-3">Let’s see what your community is saying today!</p>
-                </div>
 
-                <div className="mt-20 flex flex-col items-center gap-y-2">
-                  <div className={cn('pt-2', 'flex items-center gap-x-2')}>
-                    <div className="text-background">Accepting messages: </div>
-                    {isSwitchLoading ? (
-                      <Loader size={20} className="animate-spin text-secondary-foreground p-x-2" />
-                    ) : (
-                      <Switch
-                        {...register('acceptMessage')}
-                        checked={acceptMessages}
-                        onCheckedChange={handleSwitchChange}
-                        disabled={isSwitchLoading}
-                      />
+              <div className="mt-20 flex flex-col items-center gap-y-2">
+                <div className={cn('pt-2', 'flex items-center gap-x-2')}>
+                  <div className="text-background">Accepting messages: </div>
+                  {isSwitchLoading ? (
+                    <Loader size={20} className="animate-spin text-secondary-foreground p-x-2" />
+                  ) : (
+                    <Switch
+                      {...register('acceptMessage')}
+                      checked={acceptMessages}
+                      onCheckedChange={handleSwitchChange}
+                      disabled={isSwitchLoading}
+                    />
+                  )}
+                </div>
+                <div className="flex items-center">
+                  <div
+                    className={cn(
+                      'font-light rounded-s-xl',
+                      'px-4 py-2',
+                      'underline underline-offset-2',
+                      'bg-secondary-foreground/40',
+                      'cursor-pointer',
+                      'shadow-lg '
                     )}
+                  >
+                    {(data?.user && personalUrl) || 'NA'}
                   </div>
-                  <div className="flex items-center">
-                    <div
-                      className={cn(
-                        'font-light rounded-s-xl',
-                        'px-4 py-2',
-                        'underline underline-offset-2',
-                        'bg-secondary-foreground/40',
-                        'cursor-pointer',
-                        'shadow-lg '
-                      )}
-                    >
-                      {(data?.user && personalUrl) || 'NA'}
-                    </div>
-                    <button
-                      className={cn(
-                        'rounded-e-xl',
-                        'grid place-content-center self-stretch px-5',
-                        'underline',
-                        'bg-primary',
-                        'shadow-lg'
-                      )}
-                    >
-                      <Copy size={20} />
-                    </button>
-                  </div>
+                  <button
+                    className={cn(
+                      'rounded-e-xl',
+                      'grid place-content-center self-stretch px-5',
+                      'underline',
+                      'bg-primary',
+                      'shadow-lg'
+                    )}
+                  >
+                    <Copy size={20} />
+                  </button>
                 </div>
               </div>
             </div>
