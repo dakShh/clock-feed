@@ -4,40 +4,66 @@ import NavBar from '@/components/NavBar';
 import { cn } from '@/lib/utils';
 import { ApiResponse } from '@/types/ApiResponse';
 import axios, { AxiosError } from 'axios';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { useRouter } from 'next/navigation';
 import { Loader } from 'lucide-react';
+import { Message } from '@/models/User';
+import { User } from 'next-auth';
+
 export default function HonestHubBoard({ params }: { params: { username: string } }) {
   const router = useRouter();
   const { toast } = useToast();
-  console.log('username: ', params);
+  const [userDetails, setUserDetails] = useState<User>();
   const [isAcceptingMessages, setIsAcceptingMessages] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
-  useEffect(() => {
-    const fetchUserDetails = async () => {
-      try {
-        setIsLoading(true);
-        const response = await axios.get<ApiResponse>(
-          `/api/get-user-detail?username=${params.username}`
-        );
-        console.log('fetchUserDetails: ', response);
-        if (response.status) {
-          setIsAcceptingMessages(response.data.userDetails?.isAcceptingMessage || false);
-        }
-        setIsLoading(false);
-      } catch (error) {
-        router.replace('/');
-        const axiosError = error as AxiosError<ApiResponse>;
-        toast({
-          title: 'Error',
-          description: axiosError.response?.data.message ?? 'Error getting user info'
-        });
-      }
-    };
+  const [messages, setMessages] = useState<Message[]>([]);
 
-    fetchUserDetails();
+  const fetchMessages = async (userId: string) => {
+    // setIsLoading(true);
+    console.log('fetch messages: ', userId);
+    try {
+      const response = await axios.get<ApiResponse>(`/api/get-messages?id=${userId}`);
+      console.log('response: ', response.data);
+      setMessages(response.data.messages || []);
+    } catch (error) {
+      const axiosError = error as AxiosError<ApiResponse>;
+      const errorMessage = axiosError?.response?.data.message;
+      toast({
+        title: 'Error getting messages! :(',
+        description: errorMessage,
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const fetchUserDetails = async () => {
+    try {
+      setIsLoading(true);
+      const response = await axios.get<ApiResponse>(
+        `/api/get-user-detail?username=${params.username}`
+      );
+      console.log('fetchUserDetails: ', response);
+      if (response.status) {
+        setIsAcceptingMessages(response.data.userDetails?.isAcceptingMessage || false);
+        setUserDetails(response.data.userDetails);
+      }
+      setIsLoading(false);
+      return response.data.userDetails;
+    } catch (error) {
+      router.replace('/');
+      const axiosError = error as AxiosError<ApiResponse>;
+      toast({
+        title: 'Error',
+        description: axiosError.response?.data.message ?? 'Error getting user info'
+      });
+    }
+  };
+  useEffect(() => {
+    fetchUserDetails().then((x) => {
+      fetchMessages(x?._id || '');
+    });
   }, []);
 
   if (isLoading) {
