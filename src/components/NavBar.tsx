@@ -38,7 +38,7 @@ export default function NavBar() {
                   <Settings size={22} />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 ">
+              <DropdownMenuContent className="w-56 right-[100] ">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="text-zinc-400">{user?.email}</DropdownMenuItem>
