@@ -107,7 +107,10 @@ export default function SignInUser() {
                         {...field}
                         placeholder="Eg: daksh"
                         name="identifier"
-                        className={cn(form?.formState?.errors?.password && 'border-destructive', '')}
+                        className={cn(
+                          form?.formState?.errors?.password && 'border-destructive',
+                          ''
+                        )}
                         autoComplete="off"
                       />
                     </FormControl>
@@ -126,7 +129,10 @@ export default function SignInUser() {
                         {...field}
                         placeholder="password"
                         name="password"
-                        className={cn(form?.formState?.errors?.password && 'border-destructive', '')}
+                        className={cn(
+                          form?.formState?.errors?.password && 'border-destructive',
+                          ''
+                        )}
                         type="password"
                         // value={username}
                         // onChange={field.onChange}
@@ -170,8 +176,8 @@ export default function SignInUser() {
           <div className="relative z-20 mt-auto">
             <blockquote className="space-y-2">
               <p className="text-lg">
-                &ldquo;This library has saved me countless hours of work and helped me deliver stunning
-                designs to my clients faster than ever before.&rdquo;
+                &ldquo;This library has saved me countless hours of work and helped me deliver
+                stunning designs to my clients faster than ever before.&rdquo;
               </p>
               <footer className="text-sm">Sofia Davis</footer>
             </blockquote>
