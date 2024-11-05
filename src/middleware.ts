@@ -9,13 +9,16 @@ export async function middleware(request: NextRequest) {
   const session = await getToken({ req: request, secret });
   const url = request.nextUrl;
 
-  const protectedRoutes = ['/dashboard'];
+  const protectedRoutes = ['/dashboard', '/'];
 
-  // console.log('session: ', session);
-  // console.log('url: ', url.pathname);
+  console.log('session: ', session);
+  console.log('url: ', url);
   if (
     session &&
-    (url.pathname === '/sign-in' || url.pathname === '/sign-up' || url.pathname === '/verify')
+    (url.pathname === '/sign-in' ||
+      url.pathname === '/sign-up' ||
+      url.pathname === '/verify' ||
+      url.pathname === '/')
   ) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }

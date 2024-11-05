@@ -15,11 +15,14 @@ import { acceptMessageSchema } from '@/schemas/acceptMessageSchemas';
 import { cn } from '@/lib/utils';
 import { Copy, Loader } from 'lucide-react';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
+import { getDomain } from '@/helpers/common';
 
 export default function Dashboard() {
   const { data } = useSession();
+  const domain = getDomain();
   const user: User = data?.user as User;
-  const personalUrl = `${process.env.NEXT_PUBLIC_APP_URL}u/${user?.username}`;
+
+  const personalUrl = `${domain}/u/${user?.username}`;
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
